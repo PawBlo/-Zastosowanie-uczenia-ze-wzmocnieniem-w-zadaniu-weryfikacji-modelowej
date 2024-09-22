@@ -33,7 +33,7 @@ from open_spiel.python.algorithms import tabular_qlearner
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_integer("num_episodes", int(5e4), "Number of train episodes.")
+flags.DEFINE_integer("num_episodes", int(5e5), "Number of train episodes.")
 flags.DEFINE_boolean(
     "interactive_play",
     True,
@@ -44,12 +44,12 @@ flags.DEFINE_boolean(
 def pretty_board(time_step):
   """Returns the board in `time_step` in a human readable format."""
   info_state = time_step.observations["info_state"][0]
-  x_locations = np.nonzero(info_state[9:18])[0]
-  o_locations = np.nonzero(info_state[18:])[0]
-  board = np.full(3 * 3, ".")
+  x_locations = np.nonzero(info_state[25:50])[0]
+  o_locations = np.nonzero(info_state[50:])[0]
+  board = np.full(5 * 5, ".")
   board[x_locations] = "X"
   board[o_locations] = "0"
-  board = np.reshape(board, (3, 3))
+  board = np.reshape(board, (5, 5))
   return board
 
 
@@ -110,7 +110,7 @@ def main(_):
   training_episodes = FLAGS.num_episodes
   for cur_episode in range(training_episodes):
     if cur_episode % int(1e4) == 0:
-      win_rates = eval_against_random_bots(env, agents, random_agents, 1000)
+      win_rates = eval_against_random_bots(env, agents, agents, 1000)
       logging.info("Starting episode %s, win_rates %s", cur_episode, win_rates)
     time_step = env.reset()
     while not time_step.last():
@@ -134,7 +134,7 @@ def main(_):
       player_id = time_step.observations["current_player"]
       if player_id == human_player:
         agent_out = agents[human_player].step(time_step, is_evaluation=True)
-        logging.info("\n%s", agent_out.probs.reshape((3, 3)))
+        logging.info("\n%s", agent_out.probs.reshape((5, 5)))
         logging.info("\n%s", pretty_board(time_step))
         action = command_line_action(time_step)
       else:
